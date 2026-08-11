@@ -1,0 +1,2003 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<title>MoneyBuddy Pro</title>
+<meta name="theme-color" content="#4f46e5">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MoneyBuddy">
+<link id="manifestLink" rel="manifest" href="">
+<link id="appleTouchIcon" rel="apple-touch-icon" href="">
+<style>
+:root{
+  --p:#4f46e5; --p2:#6366f1;
+  --s:#34c759;
+  --d:#ff3b30;
+  --w:#ff9500;
+  --i:#007aff;
+  --bg:#f1f5f9;
+  --card:#ffffff;
+  --t:#1c1c1e;
+  --tl:#8e8e93;
+  --br:#e5e5ea;
+  --sat:env(safe-area-inset-top,0px);
+  --sab:env(safe-area-inset-bottom,0px);
+  --nh:80px;
+  --gap:20px;
+  --r:20px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;padding:0;height:100%;background:var(--bg);}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,'SF Pro Text',Segoe UI,Roboto,sans-serif;
+  color:var(--t);
+  overscroll-behavior-y:none;
+  -webkit-font-smoothing:antialiased;
+}
+button,input,select,textarea{font-family:inherit;}
+*:focus-visible{outline:2px solid var(--p);outline-offset:2px;border-radius:6px;}
+::-webkit-scrollbar{display:none;}
+
+.app{
+  max-width:500px;
+  margin:0 auto;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  background:var(--bg);
+  position:relative;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Toast Notifications */
+.toast {
+  position: fixed;
+  top: calc(10px + var(--sat));
+  left: 50%;
+  transform: translate(-50%, -150%);
+  background: var(--t);
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 30px;
+  font-size: 13px;
+  font-weight: 600;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 1000;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.toast.show {
+  transform: translate(-50%, 0);
+}
+
+/* Offline banner */
+.offline-banner{
+  display:none;
+  background:var(--w);
+  color:#fff;
+  text-align:center;
+  font-size:13px;
+  font-weight:600;
+  padding:8px 12px;
+  padding-top:calc(8px + var(--sat));
+}
+.offline-banner.show{display:block;}
+
+/* Header */
+header.hdr{
+  position:sticky;
+  top:0;
+  z-index:20;
+  padding:calc(14px + var(--sat)) var(--gap) 14px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  background:rgba(241,245,249,.85);
+  backdrop-filter:blur(20px) saturate(180%);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  border-bottom:1px solid var(--br);
+}
+.avatar{
+  width:42px;height:42px;border-radius:14px;
+  background:linear-gradient(135deg,var(--p),var(--p2));
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;flex-shrink:0;
+  box-shadow:0 4px 12px rgba(79,70,229,.3);
+}
+.hdr-text{flex:1;min-width:0;}
+.hdr-text h1{font-size:17px;margin:0;font-weight:700;letter-spacing:-.3px;}
+.hdr-text .status{font-size:12px;color:var(--tl);margin-top:1px;}
+.month-badge{
+  font-size:11px;font-weight:700;color:var(--p);
+  background:rgba(79,70,229,.1);
+  padding:5px 10px;border-radius:20px;white-space:nowrap;
+}
+.icon-btn{
+  width:38px;height:38px;border-radius:12px;border:none;
+  background:var(--card);display:flex;align-items:center;justify-content:center;
+  font-size:17px;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.06);
+  transition:transform .15s, background .15s;
+}
+.icon-btn:active{transform:scale(.92); background: var(--br);}
+
+/* Alerts */
+.alerts{padding:0 var(--gap);margin-top:14px;display:flex;flex-direction:column;gap:8px;}
+.alert{
+  padding:12px 14px;border-radius:14px;font-size:13px;font-weight:600;
+  display:flex;align-items:center;gap:10px;line-height:1.35;
+}
+.alert.warn{background:rgba(255,149,0,.12);color:#b8620a;}
+.alert.danger{background:rgba(255,59,48,.12);color:#c62828;}
+.alert.info{background:rgba(0,122,255,.1);color:#0059c1;}
+.alert.good{background:rgba(52,199,89,.12);color:#1e8e3e;}
+
+/* Pages */
+main{flex:1;padding-bottom:calc(var(--nh) + var(--sab) + 16px);}
+.page{display:none;flex-direction:column;padding:0 var(--gap);gap:var(--gap);animation:fadein .25s ease;}
+.page.show{display:flex;}
+@keyframes fadein{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+/* Cards */
+.card{
+  background:var(--card);border-radius:var(--r);padding:18px;
+  box-shadow:0 1px 3px rgba(0,0,0,.05);
+}
+.section-title{
+  font-size:13px;font-weight:700;color:var(--tl);
+  text-transform:uppercase;letter-spacing:.5px;
+  margin:18px 0 -6px 4px;
+}
+
+/* Dashboard */
+.hero-balance{
+  margin-top:14px;background:linear-gradient(135deg,var(--p) 0%,#7c3aed 100%);
+  border-radius:24px;padding:24px 22px;color:#fff;position:relative;overflow:hidden;
+  box-shadow:0 10px 30px -8px rgba(79,70,229,.5);
+}
+.hero-balance::after{
+  content:'';position:absolute;top:-40px;right:-40px;width:150px;height:150px;
+  background:rgba(255,255,255,.08);border-radius:50%;
+}
+.hero-balance .lbl{font-size:13px;opacity:.85;font-weight:600;}
+.hero-balance .amt{font-size:34px;font-weight:800;letter-spacing:-1px;margin-top:4px;}
+.hero-sub{display:flex;gap:10px;margin-top:14px;position:relative; border-top:1px solid rgba(255,255,255,.15); padding-top:16px;}
+.hero-sub div{flex:1;}
+.hero-sub .k{font-size:10px;opacity:.75;font-weight:600;}
+.hero-sub .v{font-size:14px;font-weight:700;margin-top:2px;letter-spacing:-.3px;}
+
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.stat-card{
+  background:var(--card);border-radius:16px;padding:14px 16px;
+  box-shadow:0 1px 3px rgba(0,0,0,.05);
+}
+.stat-card .k{font-size:12px;color:var(--tl);font-weight:600;}
+.stat-card .v{font-size:19px;font-weight:800;margin-top:3px;letter-spacing:-.3px;}
+.stat-card.pos .v{color:var(--s);}
+.stat-card.neg .v{color:var(--d);}
+
+.quick-actions{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+.qa-btn{
+  background:var(--card);border:none;border-radius:16px;padding:14px 6px;
+  display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;
+  box-shadow:0 1px 3px rgba(0,0,0,.05);transition:transform .15s;
+}
+.qa-btn:active{transform:scale(.94);}
+.qa-btn .ic{font-size:20px;}
+.qa-btn .lb{font-size:11px;font-weight:700;color:var(--t);}
+
+.list-item{
+  display:flex;align-items:center;gap:12px;padding:12px 0;
+  border-bottom:1px solid var(--br);
+}
+.list-item:last-child{border-bottom:none;}
+.li-ic{
+  width:40px;height:40px;border-radius:12px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:18px;
+}
+.li-body{flex:1;min-width:0;}
+.li-body .t1{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.li-body .t2{font-size:12px;color:var(--tl);margin-top:1px;}
+.li-amt{font-size:14px;font-weight:800;text-align:right;flex-shrink:0;}
+.li-amt.pos{color:var(--s);}
+.li-amt.neg{color:var(--d);}
+.li-actions{display:flex;gap:6px;flex-shrink:0;}
+.li-actions button{
+  width:28px;height:28px;border-radius:8px;border:none;background:var(--bg);
+  font-size:12px;cursor:pointer; transition:background .15s;
+}
+.li-actions button:hover { background: var(--br); }
+
+.empty{text-align:center;padding:36px 12px;color:var(--tl); background: var(--card); border-radius: var(--r);}
+.empty .e-ic{font-size:36px;margin-bottom:8px;}
+.empty .e-t{font-size:14px;font-weight:600; color: var(--t);}
+.empty .e-s{font-size:12px;margin-top:4px;}
+
+/* Inventory */
+.inv-item{display:flex;gap:12px;align-items:center;padding:13px 0;border-bottom:1px solid var(--br);}
+.inv-item:last-child{border-bottom:none;}
+.inv-thumb{
+  width:44px;height:44px;border-radius:12px;background:var(--bg);
+  display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;
+}
+.inv-body{flex:1;min-width:0;}
+.inv-body .t1{font-size:14px;font-weight:700;}
+.inv-body .t2{font-size:12px;color:var(--tl);margin-top:1px;}
+.tag{
+  font-size:10px;font-weight:700;padding:2px 7px;border-radius:8px;
+  display:inline-block;margin-top:4px;
+}
+.tag.new{background:rgba(52,199,89,.12);color:#1e8e3e;}
+.tag.used{background:rgba(0,122,255,.1);color:#0059c1;}
+.tag.refurb{background:rgba(255,149,0,.12);color:#b8620a;}
+.tag.sold{background:rgba(142,142,147,.15);color:var(--tl);}
+.sell-btn{
+  background:var(--p);color:#fff;border:none;border-radius:10px;
+  padding:8px 12px;font-size:12px;font-weight:700;cursor:pointer;flex-shrink:0;
+  transition: transform 0.1s;
+}
+.sell-btn:active { transform: scale(0.95); }
+
+/* Filter chips */
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;}
+.chip{
+  flex-shrink:0;padding:7px 14px;border-radius:20px;font-size:12px;font-weight:700;
+  background:var(--card);color:var(--tl);cursor:pointer;border:1px solid var(--br);
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+.chip.active{background:var(--p);color:#fff;border-color:var(--p);}
+
+/* Vault */
+.vault-hero{
+  background:linear-gradient(135deg,#111827,#1f2937);color:#fff;border-radius:24px;
+  padding:26px 22px;text-align:center;position:relative;overflow:hidden;
+}
+.vault-hero .ic{font-size:34px;}
+.vault-hero .lbl{font-size:13px;opacity:.8;font-weight:600;margin-top:6px;}
+.vault-hero .amt{font-size:30px;font-weight:800;margin-top:2px;}
+.vault-actions{display:flex;gap:12px;margin-top:14px;}
+.btn{
+  flex:1;padding:13px;border-radius:14px;border:none;font-size:14px;font-weight:700;
+  cursor:pointer;transition:transform .15s, opacity .2s;
+}
+.btn:active{transform:scale(.97);}
+.btn-primary{background:var(--p);color:#fff;}
+.btn-secondary{background:var(--bg);color:var(--t);}
+.btn-danger{background:var(--d);color:#fff;}
+.btn-full{width:100%;}
+
+/* Insights */
+.insight-card{
+  display:flex;gap:12px;background:var(--card);border-radius:16px;padding:14px 16px;
+  box-shadow:0 1px 3px rgba(0,0,0,.05);align-items:flex-start;
+}
+.insight-card .ic{font-size:20px;flex-shrink:0;}
+.insight-card p{margin:0;font-size:13px;line-height:1.45;font-weight:500;}
+.top-phone{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--br);}
+.top-phone:last-child{border-bottom:none;}
+.rank{
+  width:26px;height:26px;border-radius:8px;background:var(--bg);color:var(--tl);
+  font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+
+/* Settings */
+.settings-row{
+  display:flex;align-items:center;justify-content:between;gap:10px;padding:14px 0;
+  border-bottom:1px solid var(--br);cursor:pointer;
+}
+.settings-row:last-child{border-bottom:none;}
+.settings-row .ic{font-size:18px;width:28px;}
+.settings-row .txt{flex:1;font-size:14px;font-weight:600;}
+.settings-row .sub{font-size:12px;color:var(--tl);margin-top:1px;}
+.settings-row .chev{color:var(--tl);}
+.settings-row.danger .txt{color:var(--d);}
+
+/* Bottom nav */
+nav.bnav{
+  position:fixed;bottom:0;left:0;right:0;z-index:30;
+  max-width:500px;margin:0 auto;
+  height:calc(var(--nh) + var(--sab));
+  padding-bottom:var(--sab);
+  background:rgba(255,255,255,.9);
+  backdrop-filter:blur(20px) saturate(180%);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);
+  border-top:1px solid var(--br);
+  display:flex;
+}
+.nav-btn{
+  flex:1;background:none;border:none;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:3px;color:var(--tl);cursor:pointer;
+  font-size:10px;font-weight:700;
+}
+.nav-btn .ic{font-size:21px; transition: transform 0.2s;}
+.nav-btn.active{color:var(--p);}
+.nav-btn.active .ic {transform: translateY(-2px);}
+
+/* Modals */
+.modal{
+  position:fixed;inset:0;z-index:100;display:none;align-items:flex-end;justify-content:center;
+  background:rgba(0,0,0,.4);
+}
+.modal.open{display:flex;animation:fadein2 .2s ease;}
+@keyframes fadein2{from{opacity:0;}to{opacity:1;}}
+.modal-sheet{
+  position: relative;
+  background:var(--card);width:100%;max-width:500px;border-radius:24px 24px 0 0;
+  padding:16px 20px calc(20px + var(--sab));
+  max-height:88vh;overflow-y:auto;
+  -webkit-overflow-scrolling: touch;
+  animation:su .28s cubic-bezier(.32,.72,0,1);
+}
+@keyframes su{from{transform:translateY(100%);}to{transform:translateY(0);}}
+.sheet-handle{width:36px;height:5px;background:var(--br);border-radius:3px;margin:0 auto 14px;}
+.sheet-close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  width: 32px;
+  height: 32px;
+  border-radius: 16px;
+  background: var(--bg);
+  border: none;
+  font-size: 20px;
+  color: var(--tl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.sheet-title{font-size:18px;font-weight:800;margin-bottom:16px;letter-spacing:-.3px; padding-right: 30px;}
+.field{margin-bottom:14px;}
+.field label{font-size:12px;font-weight:700;color:var(--tl);display:block;margin-bottom:6px;}
+.field input,.field select,.field textarea{
+  width:100%;padding:13px 14px;border-radius:14px;border:1.5px solid var(--br);
+  font-size:16px;background:var(--bg);color:var(--t); transition: border-color 0.2s;
+}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--p);outline:none;}
+.field-row{display:flex;gap:10px;}
+.field-row .field{flex:1;}
+.modal-actions{display:flex;gap:10px;margin-top:6px;}
+.calc-preview{
+  background:var(--bg);border-radius:14px;padding:12px 14px;font-size:13px;
+  display:flex;justify-content:space-between;margin-bottom:14px;font-weight:700;
+}
+.calc-preview .lo{color:var(--tl);font-weight:600;}
+</style>
+</head>
+<body>
+
+<div id="toast" class="toast"></div>
+
+<div class="app">
+  <div class="offline-banner" id="offlineBanner">You're offline — changes are saved on this device</div>
+
+  <header class="hdr">
+    <div class="avatar">📱</div>
+    <div class="hdr-text">
+      <h1>MoneyBuddy Pro</h1>
+      <div class="status" id="hdrStatus">All synced</div>
+    </div>
+    <div class="month-badge" id="monthBadge">—</div>
+    <button class="icon-btn" aria-label="Help" onclick="App.openMod('md-help')">❓</button>
+    <button class="icon-btn" aria-label="Settings" onclick="App.nav('pg-settings')">⚙️</button>
+  </header>
+
+  <div class="alerts" id="alerts"></div>
+
+  <main>
+    <!-- DASHBOARD -->
+    <div class="page show" id="pg-dash">
+      <div class="hero-balance">
+        <div class="lbl">Total Available Balance</div>
+        <div class="amt" id="dashBalance">MWK 0</div>
+        <div class="hero-sub">
+          <div><div class="k">Mpamba (Restock)</div><div class="v" id="dashMpamba">MWK 0</div></div>
+          <div><div class="k">Profit (Spendable)</div><div class="v" id="dashProfitBucket">MWK 0</div></div>
+          <div><div class="k">Capital / Savings</div><div class="v" id="dashCapitalBucket">MWK 0</div></div>
+        </div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card"><div class="k">Today's sales</div><div class="v" id="dashTodaySales">MWK 0</div></div>
+        <div class="stat-card"><div class="k">Today's profit</div><div class="v" id="dashTodayProfit">MWK 0</div></div>
+        <div class="stat-card"><div class="k">Pending orders</div><div class="v" id="dashPending">MWK 0</div></div>
+        <div class="stat-card"><div class="k">Savings balance</div><div class="v" id="dashVault">MWK 0</div></div>
+      </div>
+
+      <div class="section-title">Quick actions</div>
+      <div class="quick-actions">
+        <button class="qa-btn" onclick="App.showSale()"><span class="ic">💰</span><span class="lb">Sold Phone</span></button>
+        <button class="qa-btn" onclick="App.showExpense()"><span class="ic">💸</span><span class="lb">Spent Money</span></button>
+        <button class="qa-btn" onclick="App.showOrder()"><span class="ic">📦</span><span class="lb">New Order</span></button>
+        <button class="qa-btn" onclick="App.showCapital()"><span class="ic">💼</span><span class="lb">Add Capital</span></button>
+      </div>
+
+      <div class="section-title">Recent activity</div>
+      <div class="card" id="dashRecent"></div>
+    </div>
+
+    <!-- INVENTORY -->
+    <div class="page" id="pg-inv">
+      <div class="section-title" style="margin-top:14px;">Stock</div>
+      <div class="chips" id="invChips">
+        <div class="chip active" data-f="all" onclick="App.filterInv('all')">All</div>
+        <div class="chip" data-f="available" onclick="App.filterInv('available')">Available</div>
+        <div class="chip" data-f="reserved" onclick="App.filterInv('reserved')">Reserved</div>
+        <div class="chip" data-f="sold" onclick="App.filterInv('sold')">Sold</div>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="App.showInvModal()">+ Add Phone</button>
+      <div class="card" id="invList"></div>
+    </div>
+
+    <!-- TRANSACTIONS -->
+    <div class="page" id="pg-txns">
+      <div class="section-title" style="margin-top:14px;">History</div>
+      <div class="chips" id="txnChips">
+        <div class="chip active" data-f="all" onclick="App.filterTxns('all')">All</div>
+        <div class="chip" data-f="sale" onclick="App.filterTxns('sale')">Sales</div>
+        <div class="chip" data-f="expense" onclick="App.filterTxns('expense')">Expenses</div>
+        <div class="chip" data-f="purchase" onclick="App.filterTxns('purchase')">Stock buys</div>
+        <div class="chip" data-f="capital" onclick="App.filterTxns('capital')">Capital</div>
+        <div class="chip" data-f="deposit" onclick="App.filterTxns('deposit')">Deposits</div>
+      </div>
+      <div class="card" id="txnList"></div>
+    </div>
+
+    <!-- ORDERS -->
+    <div class="page" id="pg-orders">
+      <div class="section-title" style="margin-top:14px;">Orders</div>
+      <button class="btn btn-primary btn-full" onclick="App.showOrder()">+ New Order</button>
+      <div class="card" id="ordersList"></div>
+    </div>
+
+    <!-- SAVINGS -->
+    <div class="page" id="pg-vault">
+      <div class="vault-hero" style="margin-top:14px;">
+        <div class="ic">🔒</div>
+        <div class="lbl">Protected savings</div>
+        <div class="amt" id="vaultAmt">MWK 0</div>
+        <div class="vault-actions">
+          <button class="btn btn-secondary" style="background:rgba(255,255,255,.12);color:#fff;" onclick="App.addVault()">+ Add</button>
+          <button class="btn btn-secondary" style="background:rgba(255,255,255,.12);color:#fff;" onclick="App.withdrawVault()">Withdraw</button>
+        </div>
+      </div>
+      <div class="card">
+        <p style="margin:0;font-size:13px;color:var(--tl);line-height:1.5;">Money in savings is set aside on purpose. Withdrawing asks you to confirm first, so a slow moment stands between you and spending it.</p>
+      </div>
+      <div class="section-title">Recent activity</div>
+      <div class="card" id="savingsRecentList"></div>
+    </div>
+
+    <!-- INSIGHTS -->
+    <div class="page" id="pg-insights">
+      <div class="section-title" style="margin-top:14px;">Tips for you</div>
+      <div id="insightsList" style="display:flex;flex-direction:column;gap:10px;"></div>
+
+      <div class="section-title">This month</div>
+      <div class="stat-grid">
+        <div class="stat-card"><div class="k">Total Sales</div><div class="v" id="statRevenue">MWK 0</div></div>
+        <div class="stat-card"><div class="k">What Phones Cost You</div><div class="v" id="statCost">MWK 0</div></div>
+        <div class="stat-card pos"><div class="k">Profit You Kept</div><div class="v" id="statProfit">MWK 0</div></div>
+        <div class="stat-card"><div class="k">Profit % (Margin)</div><div class="v" id="statMargin">0%</div></div>
+      </div>
+
+      <div class="section-title">Top selling phones</div>
+      <div class="card" id="topPhones"></div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="page" id="pg-settings">
+      <div class="section-title" style="margin-top:14px;">Your Data</div>
+      <div class="card">
+        <div class="settings-row" onclick="App.exportCSV()">
+          <span class="ic">📥</span>
+          <div class="txt">Download My Records<div class="sub">Saves everything as a spreadsheet file (CSV)</div></div>
+          <span class="chev">›</span>
+        </div>
+        <div class="settings-row" onclick="App.openMod('md-reset')">
+          <span class="ic">🔄</span>
+          <div class="txt">Fix My Balance<div class="sub">If a number looks wrong, tap here to recheck it</div></div>
+          <span class="chev">›</span>
+        </div>
+        <div class="settings-row danger" onclick="App.openMod('md-factory')">
+          <span class="ic">🗑️</span>
+          <div class="txt">Erase All Data<div class="sub">Deletes everything on this phone — cannot be undone</div></div>
+          <span class="chev">›</span>
+        </div>
+      </div>
+      <div class="section-title">About</div>
+      <div class="card">
+        <p style="margin:0;font-size:13px;color:var(--tl);line-height:1.6;">MoneyBuddy Pro keeps every number on this phone — nothing is sent to the internet. Download your records often so you always have a backup.</p>
+      </div>
+    </div>
+  </main>
+
+  <nav class="bnav" aria-label="Primary">
+    <button class="nav-btn active" data-p="pg-dash" onclick="App.nav('pg-dash')"><span class="ic">🏠</span><span>Home</span></button>
+    <button class="nav-btn" data-p="pg-inv" onclick="App.nav('pg-inv')"><span class="ic">📦</span><span>Stock</span></button>
+    <button class="nav-btn" data-p="pg-vault" onclick="App.nav('pg-vault')"><span class="ic">🔒</span><span>Savings</span></button>
+    <button class="nav-btn" data-p="pg-orders" onclick="App.nav('pg-orders')"><span class="ic">🧾</span><span>Orders</span></button>
+    <button class="nav-btn" data-p="pg-txns" onclick="App.nav('pg-txns')"><span class="ic">📜</span><span>History</span></button>
+    <button class="nav-btn" data-p="pg-insights" onclick="App.nav('pg-insights')"><span class="ic">📈</span><span>Tips</span></button>
+  </nav>
+</div>
+
+<!-- ================= SYSTEM MODALS ================= -->
+
+<!-- Generic Confirm Modal -->
+<div class="modal" id="md-confirm">
+  <div class="modal-sheet">
+    <button class="sheet-close" onclick="App.closeModals()">×</button>
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="confirmTitle">Confirm</div>
+    <p style="font-size:13px;color:var(--tl);margin-top:-8px;line-height:1.5;" id="confirmDesc"></p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="App.closeModals()">Cancel</button>
+      <button id="confirmBtn" class="btn btn-primary">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Generic Alert Modal -->
+<div class="modal" id="md-alert">
+  <div class="modal-sheet">
+    <button class="sheet-close" onclick="App.closeModals()">×</button>
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Notice</div>
+    <p style="font-size:14px;color:var(--t);margin-top:-8px;line-height:1.5;" id="alertDesc"></p>
+    <div class="modal-actions">
+      <button class="btn btn-primary btn-full" onclick="App.closeModals()">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit Amount Prompt -->
+<div class="modal" id="md-edit-amt">
+  <div class="modal-sheet">
+    <button class="sheet-close" onclick="App.closeModals()">×</button>
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Edit Amount</div>
+    <p style="font-size:13px;color:var(--tl);margin-top:-8px;" id="editAmtDesc"></p>
+    <div class="field">
+      <label>Amount (MWK)</label>
+      <input type="number" step="any" id="editAmtInput" inputmode="decimal">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="App.closeModals()">Cancel</button>
+      <button id="editAmtBtn" class="btn btn-primary">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= FEATURE MODALS ================= -->
+
+<!-- MODAL: Sale -->
+<div class="modal" id="md-sale">
+  <div class="modal-sheet">
+    <button class="sheet-close" onclick="App.closeModals()">×</button>
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="saleTitle">I Sold a Phone</div>
+    <div class="field" id="saleInvSelectWrap">
+      <label>Which Phone (from your Stock)</label>
+      <select id="saleInv" onchange="App.onSaleInvChange()"></select>
+    </div>
+    <div class="field" id="saleInvReadonlyWrap" style="display:none;">
+      <label>Phone</label>
+      <div style="padding:13px 14px;border-radius:14px;background:var(--bg);font-size:14px;font-weight:600;" id="saleInvReadonlyText"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Sell price (MWK)</label><input type="number" step="any" id="saleAmt" inputmode="decimal" oninput="App.updateSalePreview()"></div>
+      <div class="field"><label>Date</label><input type="date" id="saleDate"></div>
+    </div>
+    <div class="calc-preview">
+      <span class="lo">Cost</span><span id="salePreviewCost">MWK 0</span>
+    </div>
+    <div class="calc-preview">
+      <span class="lo">Profit / margin</span><span id="salePreviewProfit">MWK 0 (0%)</span>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary btn-full" onclick="App.saveSale()">Save sale</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Inventory -->
+<div class="modal" id="md-inv">
+  <div class="modal-sheet">
+    <button class="sheet-close" onclick="App.closeModals()">×</button>
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="invTitle">Add phone</div>
+    <div class="field"><label>Model</label><input type="text" id="invModel" placeholder="e.g. iPhone 12 128GB"></div>
+    <div class="field-row">
+      <div class="field">
+        <label>Condition</label>
+        <select id="invCondition">
+          <option value="new">New</option>
+          <option value="used">Used</option>
+          <option value="refurb">Refurbished (Fixed Up)</option>
+        </select>
+      </div>
+      <div class="field"><label>Supplier</label><input type="text" id="invSupplier" placeholder="Optional"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Cost (MWK)</label><input type="number" step="any" id="invCost" inputmode="decimal"></div>
+      <div class="field"><label>Expected sell price (MWK)</label><input type="number" step="any" id="invSellPrice" inputmode="decimal"></div>
+    </div>
+    <div class="field" id="invFundSourceWrap">
+      <label>Pay cost from</label>
+      <select id="invFundSource">
+        <option value="mpamba">Mpamba (Restock Fund)</option>
+        <option value="capital">Initial Capital (My Savings)</option>
+        <option value="profit">Profit (Spendable)</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary btn-full" onclick="App.saveInv()">Save phone</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Order -->
+<div class="modal" id="md-order">
+  <div class="modal-sheet">
+    <button class="sheet-close" onclick="App.closeModals()">×</button>
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">New order</div>
+    <div class="field"><label>Customer name</label><input type="text" id="orderCustomer"></div>
+    <div class="field">
+      <label>Which Phone (optional, from your Stock)</label>
+      <select id="orderInv" onchange="App.onOrderInvChange()"></select>
+    </div>
+    <div class="field" id="orderPhoneManualWrap">
+      <label>Or type the phone (if not in stock)</label>
+      <input type="text" id="orderPhone" placeholder="e.g. Samsung A14">
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Total price (MWK)</label><input type="number" step="any" id="orderPrice" inputmode="decimal"></div>
+      <div class="field"><label>Deposit (money paid today)</label><input type="number" step="any" id="orderDeposit" inputmode="decimal"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary btn-full" onclick="App.saveOrder()">Create order</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Expense -->
+<div class="modal" id="md-expense">
+  <div class="modal-sheet">
+    <button class="sheet-close" onclick="App.closeModals()">×</button>
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="expenseTitle">I Spent Money</div>
+    <div class="field"><label>Description</label><input type="text" id="expenseDesc" placeholder="e.g. Transport, airtime"></div>
+    <div class="field-row">
+      <div class="field"><label>Amount (MWK)</label><input type="number" step="any" id="expenseAmt" inputmode="decimal"></div>
+      <div class="field"><label>Date</label><input type="date" id="expenseDate"></div>
+    </div>
+    <div class="field">
+      <label>Pay from</label>
+      <select id="expenseFundSource">
+        <option value="profit">Profit (Spendable)</option>
+        <option value="mpamba">Mpamba (Restock)</option>
+        <option value="capital">Initial Capital (My Savings)</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary btn-full" onclick="App.saveExpense()">Save expense</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Capital -->
+<div class="modal" id="md-capital">
+  <div class="modal-sheet">
+    <button class="sheet-close" onclick="App.closeModals()">×</button>
+    <div class="sheet-handle"></div>
+    <div class="sheet-title" id="capitalTitle">Add Money to the Business</div>
+    <div class="field"><label>Description</label><input type="text" id="capitalDesc" placeholder="e.g. My own savings"></div>
+    <div class="field-row">
+      <div class="field"><label>Amount (MWK)</label><input type="number" step="any" id="capitalAmt" inputmode="decimal"></div>
+      <div class="field"><label>Date</label><input type="date" id="capitalDate"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary btn-full" onclick="App.saveCapital()">Save capital</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Vault add -->
+<div class="modal" id="md-vault-add">
+  <div class="modal-sheet">
+    <button class="sheet-close" onclick="App.closeModals()">×</button>
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Add to savings</div>
+    <div class="field">
+      <label>Description (Optional)</label>
+      <input type="text" id="vaultAddDesc" placeholder="e.g. Weekly savings">
+    </div>
+    <div class="field">
+      <label>Amount (MWK)</label>
+      <input type="number" step="any" id="vaultAddAmt" inputmode="decimal">
+      <div id="vaultAddError" style="display:none;color:var(--d);font-size:12px;font-weight:600;margin-top:6px;"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-primary btn-full" onclick="App.doAddVault()">Move to savings</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Vault withdraw -->
+<div class="modal" id="md-vault-withdraw">
+  <div class="modal-sheet">
+    <button class="sheet-close" onclick="App.closeModals()">×</button>
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Withdraw from savings</div>
+    <p style="font-size:13px;color:var(--tl);margin-top:-8px;">This money was set aside on purpose. Take a moment before pulling it back out.</p>
+    <div class="field">
+      <label>Reason / Description</label>
+      <input type="text" id="vaultWithdrawDesc" placeholder="e.g. Rent, Emergency">
+    </div>
+    <div class="field">
+      <label>Amount (MWK)</label>
+      <input type="number" step="any" id="vaultWithdrawAmt" inputmode="decimal">
+      <div id="vaultWithdrawError" style="display:none;color:var(--d);font-size:12px;font-weight:600;margin-top:6px;"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-danger btn-full" onclick="App.doWithdrawVault()">Withdraw from savings</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Delete confirm -->
+<div class="modal" id="md-delete">
+  <div class="modal-sheet">
+    <button class="sheet-close" onclick="App.closeModals()">×</button>
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Delete transaction?</div>
+    <p style="font-size:13px;color:var(--tl);margin-top:-8px;" id="deleteDesc">This will reverse its effect on your balance.</p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="App.closeModals()">Cancel</button>
+      <button class="btn btn-danger" onclick="App.confirmDelete()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Cancel order -->
+<div class="modal" id="md-cancel-order">
+  <div class="modal-sheet">
+    <button class="sheet-close" onclick="App.closeModals()">×</button>
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Cancel order?</div>
+    <p style="font-size:13px;color:var(--tl);margin-top:-8px;">If a deposit was paid, choose whether to refund it.</p>
+    <div class="field">
+      <label>Deposit</label>
+      <select id="cancelRefund">
+        <option value="refund">Refund deposit to customer</option>
+        <option value="keep">Keep deposit</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="App.closeModals()">Back</button>
+      <button class="btn btn-danger" onclick="App.confirmCancelOrder()">Cancel order</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Help -->
+<div class="modal" id="md-help">
+  <div class="modal-sheet">
+    <button class="sheet-close" onclick="App.closeModals()">×</button>
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">How This App Works</div>
+    <div style="display:flex;flex-direction:column;gap:14px;margin-bottom:14px;">
+      <div><b style="font-size:14px;">💰 Balance Breakdown</b><p style="margin:4px 0 0;font-size:13px;color:var(--tl);line-height:1.5;">Your Total Balance is split into three parts so you never eat your capital: <b>Mpamba</b> (reserved to restock sold phones), <b>Profit</b> (safe to spend or save), and <b>Capital / Savings</b> (the base money you started with or added from your pocket).</p></div>
+      <div><b style="font-size:14px;">📦 Stock</b><p style="margin:4px 0 0;font-size:13px;color:var(--tl);line-height:1.5;">The phones you have bought and are trying to sell.</p></div>
+      <div><b style="font-size:14px;">Sold a Phone</b><p style="margin:4px 0 0;font-size:13px;color:var(--tl);line-height:1.5;">Tap this every time you sell a phone. It adds the money to your Balance.</p></div>
+      <div><b style="font-size:14px;">Spent Money</b><p style="margin:4px 0 0;font-size:13px;color:var(--tl);line-height:1.5;">Tap this for things like transport or airtime. It removes the money from your Balance.</p></div>
+      <div><b style="font-size:14px;">🧾 Order</b><p style="margin:4px 0 0;font-size:13px;color:var(--tl);line-height:1.5;">When a customer wants a phone but pays part now (deposit) and the rest later.</p></div>
+      <div><b style="font-size:14px;">💼 Add Money</b><p style="margin:4px 0 0;font-size:13px;color:var(--tl);line-height:1.5;">Use this when you put your own money into the business, like starting savings.</p></div>
+      <div><b style="font-size:14px;">🔒 Savings</b><p style="margin:4px 0 0;font-size:13px;color:var(--tl);line-height:1.5;">A safe place to keep money aside so you don't spend it by mistake.</p></div>
+      <div><b style="font-size:14px;">Profit</b><p style="margin:4px 0 0;font-size:13px;color:var(--tl);line-height:1.5;">What you keep after selling a phone, once you subtract what the phone cost you.</p></div>
+      <div><b style="font-size:14px;">Profit % (Margin)</b><p style="margin:4px 0 0;font-size:13px;color:var(--tl);line-height:1.5;">How much of the sale price is profit, shown as a percentage. Higher is better.</p></div>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="App.closeModals()">Got it</button>
+  </div>
+</div>
+
+<!-- MODAL: Recalculate balance -->
+<div class="modal" id="md-reset">
+  <div class="modal-sheet">
+    <button class="sheet-close" onclick="App.closeModals()">×</button>
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Fix My Balance?</div>
+    <p style="font-size:13px;color:var(--tl);margin-top:-8px;">Rebuilds your balance from the full transaction history. Use this if a number ever looks wrong.</p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="App.closeModals()">Cancel</button>
+      <button class="btn btn-primary" onclick="App.doRecalc()">Recalculate</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Factory reset -->
+<div class="modal" id="md-factory">
+  <div class="modal-sheet">
+    <button class="sheet-close" onclick="App.closeModals()">×</button>
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">Erase all data?</div>
+    <p style="font-size:13px;color:var(--tl);margin-top:-8px;">This deletes every sale, expense, order, and inventory item on this device. Export a CSV first if you want a backup. This cannot be undone.</p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="App.closeModals()">Cancel</button>
+      <button class="btn btn-danger" onclick="App.doFactoryReset()">Erase everything</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  const App = {
+    data: {
+      transactions: [],
+      orders: [],
+      inventory: [],
+      vault: 0,
+      balance: 0,
+      mpamba: 0,
+      profitBucket: 0,
+      capitalBucket: 0
+    },
+    _invFilter: 'all',
+    _txnFilter: 'all',
+    _pendingDeleteId: null,
+    _pendingCancelOrderId: null,
+    _toastTimeout: null,
+
+    /* ---------- Persistence ---------- */
+    loadData() {
+      try {
+        this.data.transactions = JSON.parse(localStorage.getItem('mb_txns') || '[]');
+        this.data.orders = JSON.parse(localStorage.getItem('mb_orders') || '[]');
+        this.data.inventory = JSON.parse(localStorage.getItem('mb_inv') || '[]');
+        this.data.vault = parseFloat(localStorage.getItem('mb_vault') || '0') || 0;
+        this.data.balance = parseFloat(localStorage.getItem('mb_bal') || '0') || 0;
+      } catch(e) {
+        console.error('Failed to load data', e);
+      }
+      this.validateData();
+    },
+    
+    saveData() {
+      try {
+        this.recalcBalance(); // Auto-sync all buckets perfectly before saving to storage
+        localStorage.setItem('mb_txns', JSON.stringify(this.data.transactions));
+        localStorage.setItem('mb_orders', JSON.stringify(this.data.orders));
+        localStorage.setItem('mb_inv', JSON.stringify(this.data.inventory));
+        localStorage.setItem('mb_vault', String(this.data.vault));
+        localStorage.setItem('mb_bal', String(this.data.balance));
+      } catch(e) {
+        console.error('Failed to save data', e);
+      }
+    },
+    
+    validateData() {
+      this.data.transactions = (this.data.transactions || []).filter(t => t && t.id && t.type && typeof t.amount === 'number' && t.date);
+      this.data.orders = this.data.orders || [];
+      this.data.inventory = this.data.inventory || [];
+      this.recalcBalance(); // Now inherently syncs the vault too!
+    },
+    
+    recalcBalance() {
+      let bal = 0;
+      let vault = 0;
+      let mpamba = 0, profitBucket = 0, capitalBucket = 0;
+      
+      // SAFELY Sort dates to avoid iOS Safari NaN bugs
+      const sorted = this.data.transactions.slice().sort((a,b) => {
+        const d1 = a.date || '';
+        const d2 = b.date || '';
+        return d1.localeCompare(d2);
+      });
+      
+      sorted.forEach(t => {
+        // Main balance logic
+        if (['sale', 'deposit', 'capital', 'vault_in'].includes(t.type)) bal += t.amount;
+        else if (['expense', 'purchase', 'vault_out', 'refund'].includes(t.type)) bal -= t.amount;
+        
+        // Vault balance strictly tied to transaction history
+        if (t.type === 'vault_out') vault += t.amount;
+        else if (t.type === 'vault_in') vault -= t.amount;
+
+        // Bucket Logic
+        if (t.type === 'capital') {
+          capitalBucket += t.amount;
+        } else if (t.type === 'purchase' || t.type === 'expense') {
+          const b = t.bucket || (t.type === 'purchase' ? 'mpamba' : 'profit');
+          if (b === 'capital') capitalBucket -= t.amount;
+          else if (b === 'profit') profitBucket -= t.amount;
+          else mpamba -= t.amount;
+        } else if (t.type === 'sale') {
+          let prevDeposit = 0;
+          if (t.revenue !== undefined && t.revenue > t.amount) {
+             prevDeposit = t.revenue - t.amount;
+          }
+          mpamba += ((t.cost || 0) - prevDeposit);
+          profitBucket += (t.profit || 0);
+        } else if (t.type === 'deposit') {
+          mpamba += t.amount; // Deposits sit in mpamba until completed
+        } else if (t.type === 'refund') {
+          mpamba -= t.amount; // Refunds pull from mpamba since deposit went there
+        } else if (t.type === 'vault_out') {
+          profitBucket -= t.amount; // Savings come from profit
+        } else if (t.type === 'vault_in') {
+          profitBucket += t.amount; // Returning from savings to profit
+        }
+      });
+      
+      this.data.balance = bal;
+      this.data.vault = vault;
+      this.data.mpamba = mpamba;
+      this.data.profitBucket = profitBucket;
+      this.data.capitalBucket = capitalBucket;
+    },
+
+    /* ---------- UI Helpers ---------- */
+    showToast(message) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.classList.add('show');
+      if (this._toastTimeout) clearTimeout(this._toastTimeout);
+      this._toastTimeout = setTimeout(() => {
+        toast.classList.remove('show');
+      }, 3000);
+    },
+
+    showAlert(msg) {
+      document.getElementById('alertDesc').textContent = msg;
+      this.openMod('md-alert');
+    },
+
+    showConfirm(title, desc, actionText, actionClass, onConfirm) {
+      document.getElementById('confirmTitle').textContent = title;
+      document.getElementById('confirmDesc').textContent = desc;
+      
+      const btn = document.getElementById('confirmBtn');
+      btn.textContent = actionText;
+      btn.className = 'btn ' + actionClass;
+      btn.onclick = () => {
+        this.closeModals();
+        onConfirm();
+      };
+      
+      this.openMod('md-confirm');
+    },
+
+    showPrompt(desc, defaultVal, callback) {
+      document.getElementById('editAmtDesc').textContent = `New amount for "${desc}"`;
+      const input = document.getElementById('editAmtInput');
+      input.value = defaultVal;
+      
+      document.getElementById('editAmtBtn').onclick = () => {
+        const val = input.value;
+        this.closeModals();
+        callback(val);
+      };
+      
+      this.openMod('md-edit-amt');
+    },
+
+    /* ---------- Helpers ---------- */
+    uid: () => Date.now().toString(36) + Math.random().toString(36).slice(2,8),
+    
+    todayStr() {
+      const d = new Date();
+      d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+      return d.toISOString().slice(0, 10);
+    },
+    
+    fm(a, short = false) {
+      a = a || 0;
+      const x = Math.abs(a);
+      let out = '';
+      if (short && x >= 1e6) {
+        out = `MWK ${(x / 1e6).toFixed(1)}M`;
+      } else {
+        out = `MWK ${x.toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+      }
+      return a < 0 ? `-${out}` : out;
+    },
+    
+    fmDate(d) {
+      // Robust ISO date formatting
+      let dt;
+      if (!d) return '';
+      if (d.indexOf('T') === -1) {
+          // If strictly YYYY-MM-DD
+          const parts = d.split('-');
+          if (parts.length === 3) {
+             dt = new Date(parts[0], parts[1]-1, parts[2]);
+          } else {
+             dt = new Date(d);
+          }
+      } else {
+          dt = new Date(d);
+      }
+      return dt.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    },
+    
+    isToday(d) { return (d || '').slice(0,10) === this.todayStr(); },
+    
+    isThisMonth(d) {
+      if (!d) return false;
+      const yr = d.slice(0,4);
+      const mo = d.slice(5,7);
+      const now = new Date();
+      return parseInt(yr) === now.getFullYear() && parseInt(mo) === (now.getMonth() + 1);
+    },
+    
+    getTodayTxns() { return this.data.transactions.filter(t => this.isToday(t.date)); },
+    getMonthTxns() { return this.data.transactions.filter(t => this.isThisMonth(t.date)); },
+
+    /* ---------- Calculations ---------- */
+    totalCost(list) { 
+      list = list || this.data.transactions; 
+      return list.filter(t => t.type === 'sale').reduce((s,t) => s + (t.cost || 0), 0); 
+    },
+    totalRevenue(list) { 
+      list = list || this.data.transactions; 
+      return list.filter(t => t.type === 'sale').reduce((s,t) => s + (t.revenue !== undefined ? t.revenue : t.amount), 0); 
+    },
+    totalProfit(list) { return this.totalRevenue(list) - this.totalCost(list); },
+    profitMargin(list) {
+      const rev = this.totalRevenue(list);
+      if(!rev) return 0;
+      return (this.totalProfit(list) / rev) * 100;
+    },
+    pendingTotal() {
+      return this.data.orders.filter(o => o.status === 'pending')
+        .reduce((s,o) => s + (o.price - o.deposit), 0);
+    },
+
+    /* ---------- Navigation ---------- */
+    nav(pageId) {
+      document.querySelectorAll('.page').forEach(p => p.classList.toggle('show', p.id === pageId));
+      document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.p === pageId));
+      window.scrollTo(0,0);
+      this.refresh();
+    },
+
+    /* ---------- Refresh / render ---------- */
+    refresh() {
+      // Dash updates
+      document.getElementById('dashBalance').textContent = this.fm(this.data.balance, true);
+      document.getElementById('dashMpamba').textContent = this.fm(this.data.mpamba, true);
+      document.getElementById('dashProfitBucket').textContent = this.fm(this.data.profitBucket, true);
+      document.getElementById('dashCapitalBucket').textContent = this.fm(this.data.capitalBucket, true);
+      document.getElementById('dashVault').textContent = this.fm(this.data.vault, true);
+      
+      const vaultAmtEl = document.getElementById('vaultAmt');
+      if (vaultAmtEl) {
+        vaultAmtEl.textContent = this.fm(this.data.vault);
+      }
+      
+      const todayTxns = this.getTodayTxns();
+      const todaySales = todayTxns.filter(t => t.type === 'sale').reduce((s,t) => s + (t.revenue !== undefined ? t.revenue : t.amount), 0);
+      const todayProfit = todayTxns.filter(t => t.type === 'sale').reduce((s,t) => s + (t.profit || 0), 0);
+      
+      document.getElementById('dashTodaySales').textContent = this.fm(todaySales, true);
+      document.getElementById('dashTodayProfit').textContent = this.fm(todayProfit, true);
+      document.getElementById('dashPending').textContent = this.fm(this.pendingTotal(), true);
+
+      const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+      const now = new Date();
+      document.getElementById('monthBadge').textContent = `${months[now.getMonth()].slice(0,3)} ${now.getFullYear()}`;
+
+      const stockLeft = this.data.inventory.filter(i => !i.sold).length;
+      document.getElementById('hdrStatus').textContent = `${stockLeft} phone${stockLeft === 1 ? '' : 's'} in stock`;
+
+      this.renderAlerts();
+      this.showRecent();
+      this.showInv();
+      this.showTxns();
+      this.showOrders();
+      this.showStats();
+      this.showSavingsRecent();
+      this.insights();
+    },
+
+    renderAlerts() {
+      let out = [];
+      if(this.data.balance < 0){
+        out.push({cls:'danger', ic:'⚠️', t:'Your balance is negative. Consider adding capital or reducing expenses.'});
+      }
+      const available = this.data.inventory.filter(i => !i.sold).length;
+      if(this.data.orders.filter(o => o.status === 'pending').length > available && available === 0){
+        out.push({cls:'warn', ic:'📦', t:'You have pending orders but no phones in stock to fulfil them.'});
+      }
+      const todaySaleTxns = this.getTodayTxns().filter(t => t.type === 'sale');
+      todaySaleTxns.forEach(t => {
+        if((t.profit || 0) < 0){
+          out.push({cls:'danger', ic:'📉', t:`"${t.desc}" sold at a loss today.`});
+        }
+      });
+      document.getElementById('alerts').innerHTML = out.map(a => `<div class="alert ${a.cls}"><span>${a.ic}</span><span>${a.t}</span></div>`).join('');
+    },
+
+    showRecent() {
+      const recent = this.data.transactions.filter(t => t.type !== 'vault_in' && t.type !== 'vault_out')
+        .slice().sort((a,b) => {
+           const d1 = a.date || ''; const d2 = b.date || '';
+           return d2.localeCompare(d1);
+        }).slice(0,6);
+      
+      const el = document.getElementById('dashRecent');
+      if(!recent.length){ 
+        el.innerHTML = this.emptyHtml('🧾','No activity yet','Record a sale or expense to get started'); 
+        return; 
+      }
+      el.innerHTML = recent.map(t => this.txnRowHtml(t, false, false)).join('');
+    },
+
+    showSavingsRecent() {
+      const recent = this.data.transactions.filter(t => t.type === 'vault_in' || t.type === 'vault_out')
+        .slice().sort((a,b) => {
+           const d1 = a.date || ''; const d2 = b.date || '';
+           return d2.localeCompare(d1);
+        }).slice(0, 10);
+      
+      const el = document.getElementById('savingsRecentList');
+      if(!recent.length){ 
+        el.innerHTML = this.emptyHtml('🔒','No savings activity','Move money in or out of savings to see it here'); 
+        return; 
+      }
+      // Pass true for `isSavingsContext`
+      el.innerHTML = recent.map(t => this.txnRowHtml(t, false, true)).join('');
+    },
+
+    filterInv(f) {
+      this._invFilter = f;
+      document.querySelectorAll('#invChips .chip').forEach(c => c.classList.toggle('active', c.dataset.f === f));
+      this.showInv();
+    },
+    
+    showInv() {
+      let list = this.data.inventory.slice().sort((a,b) => {
+        const d1 = a.dateAdded || ''; const d2 = b.dateAdded || '';
+        return d2.localeCompare(d1);
+      });
+      
+      if(this._invFilter === 'available') list = list.filter(i => !i.sold && !i.reservedOrderId);
+      if(this._invFilter === 'reserved') list = list.filter(i => !i.sold && !!i.reservedOrderId);
+      if(this._invFilter === 'sold') list = list.filter(i => i.sold);
+      
+      list = list.slice(0,50);
+      const el = document.getElementById('invList');
+      if(!list.length) { 
+        el.innerHTML = this.emptyHtml('📦','No phones here','Add a phone to your stock'); 
+        return; 
+      }
+      
+      el.innerHTML = list.map(i => {
+        const condCls = i.condition === 'new' ? 'new' : (i.condition === 'refurb' ? 'refurb' : 'used');
+        const reserved = !i.sold && !!i.reservedOrderId;
+        const tagCls = i.sold ? 'sold' : (reserved ? 'refurb' : condCls);
+        const tagLabel = i.sold ? 'Sold' : (reserved ? 'Reserved' : i.condition);
+        
+        let actions = '';
+        if(i.sold){
+          actions = '';
+        } else if(reserved){
+          actions = `<div class="li-actions"><span style="font-size:11px;color:var(--tl);padding:0 4px;">On order</span></div>`;
+        } else {
+          actions = `
+            <div class="li-actions" style="flex-direction:column;align-items:stretch;">
+              <button class="sell-btn" onclick="App.showSale(null,'${i.id}')">Sell</button>
+              <button onclick="App.deleteInv('${i.id}')" style="margin-top:6px;">🗑️</button>
+            </div>`;
+        }
+        
+        return `
+          <div class="inv-item">
+            <div class="inv-thumb">📱</div>
+            <div class="inv-body">
+              <div class="t1">${App.esc(i.model)}</div>
+              <div class="t2">Cost ${this.fm(i.cost, true)} · Sell ${this.fm(i.sellPrice, true)}</div>
+              <span class="tag ${tagCls}">${tagLabel}</span>
+            </div>
+            ${actions}
+          </div>`;
+      }).join('');
+    },
+    
+    showInvModal() {
+      document.getElementById('invTitle').textContent = 'Add phone';
+      document.getElementById('invModel').value = '';
+      document.getElementById('invCondition').value = 'used';
+      document.getElementById('invSupplier').value = '';
+      document.getElementById('invCost').value = '';
+      document.getElementById('invSellPrice').value = '';
+      this.openMod('md-inv');
+    },
+    
+    saveInv() {
+      const model = document.getElementById('invModel').value.trim();
+      const cost = parseFloat(document.getElementById('invCost').value);
+      const sellPrice = parseFloat(document.getElementById('invSellPrice').value);
+      const fundSource = document.getElementById('invFundSource').value;
+      
+      if(!model){ this.showAlert('Enter a phone model'); return; }
+      if(isNaN(cost) || cost < 0){ this.showAlert('Enter a valid cost'); return; }
+      if(isNaN(sellPrice) || sellPrice < 0){ this.showAlert('Enter a valid sell price'); return; }
+      
+      const item = {
+        id: this.uid(),
+        model: model,
+        condition: document.getElementById('invCondition').value,
+        cost: cost,
+        sellPrice: sellPrice,
+        supplier: document.getElementById('invSupplier').value.trim(),
+        sold: false,
+        dateAdded: new Date().toISOString()
+      };
+      
+      this.data.inventory.push(item);
+      if(cost > 0){
+        this.data.transactions.push({ id: this.uid(), type: 'purchase', desc: `Stock purchase — ${model}`, amount: cost, invId: item.id, date: new Date().toISOString(), bucket: fundSource });
+        this.data.balance -= cost;
+      }
+      
+      this.saveData();
+      this.closeModals();
+      this.refresh();
+      this.showToast('Phone added to stock');
+    },
+    
+    deleteInv(id) {
+      const item = this.data.inventory.find(i => i.id === id);
+      if(!item) return;
+      if(item.sold){ this.showAlert('This phone has already been sold — delete its sale from History first.'); return; }
+      if(item.reservedOrderId){ this.showAlert('This phone is reserved on a pending order — cancel that order first.'); return; }
+      
+      this.showConfirm(
+        'Remove from Stock?',
+        `Remove "${item.model}" from stock? This will refund its purchase cost to your balance.`,
+        'Remove Phone',
+        'btn-danger',
+        () => {
+          const txnIdx = this.data.transactions.findIndex(t => t.type === 'purchase' && t.invId === id);
+          if(txnIdx !== -1){
+            this.data.balance += this.data.transactions[txnIdx].amount;
+            this.data.transactions.splice(txnIdx, 1);
+          }
+          
+          this.data.inventory = this.data.inventory.filter(i => i.id !== id);
+          this.saveData();
+          this.refresh();
+          this.showToast('Phone removed');
+        }
+      );
+    },
+
+    filterTxns(f) {
+      this._txnFilter = f;
+      document.querySelectorAll('#txnChips .chip').forEach(c => c.classList.toggle('active', c.dataset.f === f));
+      this.showTxns();
+    },
+    
+    showTxns() {
+      let list = this.data.transactions.filter(t => t.type !== 'vault_in' && t.type !== 'vault_out')
+        .slice().sort((a,b) => {
+           const d1 = a.date || ''; const d2 = b.date || '';
+           return d2.localeCompare(d1);
+        });
+      
+      if(this._txnFilter !== 'all') list = list.filter(t => t.type === this._txnFilter);
+      
+      list = list.slice(0,50);
+      const el = document.getElementById('txnList');
+      if(!list.length){ 
+        el.innerHTML = this.emptyHtml('📜','No transactions','Nothing matches this filter yet'); 
+        return; 
+      }
+      el.innerHTML = list.map(t => this.txnRowHtml(t, true, false)).join('');
+    },
+    
+    txnRowHtml(t, withActions, isSavingsContext = false) {
+      const icons = {sale:'💰', expense:'💸', deposit:'📥', capital:'💼', refund:'↩️', purchase:'📦', vault_out:'🛡️', vault_in:'🔓'};
+      const colors = {sale:'rgba(52,199,89,.12)', expense:'rgba(255,59,48,.12)', deposit:'rgba(0,122,255,.1)', capital:'rgba(79,70,229,.1)', refund:'rgba(255,149,0,.12)', purchase:'rgba(255,149,0,.12)', vault_out:'rgba(52,199,89,.12)', vault_in:'rgba(255,149,0,.12)'};
+      
+      let isNeg = false;
+      if (isSavingsContext) {
+         // Inside savings tab: "vault_in" is withdrawing from savings, meaning it's negative.
+         isNeg = (t.type === 'vault_in'); 
+      } else {
+         // Inside main tab: regular expenses, purchases, refunds, and "vault_out" (moving money away to vault) are negative.
+         isNeg = ['expense', 'purchase', 'vault_out', 'refund'].includes(t.type);
+      }
+
+      let actions = '';
+      const manageElsewhere = t.type === 'purchase' || !!t.orderId;
+      
+      if(withActions && !manageElsewhere){
+        actions = `<div class="li-actions">
+          ${t.type !== 'deposit' && t.type !== 'refund' ? `<button onclick="App.editTxn('${t.id}')">✏️</button>` : ''}
+          <button onclick="App.showDelete('${t.id}')">🗑️</button>
+        </div>`;
+      } else if(withActions && manageElsewhere){
+        const label = t.type === 'purchase' ? 'via Stock' : 'via Orders';
+        actions = `<div class="li-actions"><span style="font-size:11px;color:var(--tl);padding:0 4px;">${label}</span></div>`;
+      }
+      
+      return `
+        <div class="list-item">
+          <div class="li-ic" style="background:${colors[t.type]}">${icons[t.type]}</div>
+          <div class="li-body">
+            <div class="t1">${App.esc(t.desc)}</div>
+            <div class="t2">${this.fmDate(t.date)}</div>
+          </div>
+          <div class="li-amt ${isNeg ? 'neg' : 'pos'}">${isNeg ? '-' : '+'}${this.fm(t.amount)}</div>
+          ${actions}
+        </div>`;
+    },
+
+    showOrders() {
+      const list = this.data.orders.slice().sort((a,b) => {
+         const d1 = a.date || ''; const d2 = b.date || '';
+         return d2.localeCompare(d1);
+      }).slice(0,50);
+      
+      const el = document.getElementById('ordersList');
+      if(!list.length){ el.innerHTML = this.emptyHtml('🧾','No orders yet','Create an order to track a customer deposit'); return; }
+      
+      el.innerHTML = list.map(o => {
+        const statusColor = o.status === 'pending' ? 'var(--w)' : (o.status === 'completed' ? 'var(--s)' : 'var(--d)');
+        const remaining = o.price - o.deposit;
+        return `
+          <div class="list-item">
+            <div class="li-ic" style="background:rgba(0,0,0,.04);color:${statusColor}">🧾</div>
+            <div class="li-body">
+              <div class="t1">${App.esc(o.customer)} — ${App.esc(o.phone)}</div>
+              <div class="t2">${this.fm(o.price, true)} total · ${this.fm(o.deposit, true)} deposit · ${o.status}</div>
+            </div>
+            ${o.status === 'pending' ? `
+              <div class="li-actions">
+                <button onclick="App.completeOrder('${o.id}')">✅</button>
+                <button onclick="App.showCancelOrder('${o.id}')">✖️</button>
+              </div>` : ''}
+          </div>`;
+      }).join('');
+    },
+    
+    showOrder() {
+      document.getElementById('orderCustomer').value = '';
+      document.getElementById('orderPhone').value = '';
+      document.getElementById('orderPrice').value = '';
+      document.getElementById('orderDeposit').value = '';
+      
+      const sel = document.getElementById('orderInv');
+      const available = this.data.inventory.filter(i => !i.sold && !i.reservedOrderId);
+      
+      sel.innerHTML = `<option value="">— None, type phone manually —</option>` + available.map(i => 
+        `<option value="${i.id}" data-price="${i.sellPrice}">${App.esc(i.model)}</option>`
+      ).join('');
+      
+      this.onOrderInvChange();
+      this.openMod('md-order');
+    },
+    
+    onOrderInvChange() {
+      const sel = document.getElementById('orderInv');
+      const opt = sel.options[sel.selectedIndex];
+      const wrap = document.getElementById('orderPhoneManualWrap');
+      
+      if(opt && opt.value){
+        wrap.style.display = 'none';
+        if(!document.getElementById('orderPrice').value) document.getElementById('orderPrice').value = opt.dataset.price;
+      } else {
+        wrap.style.display = '';
+      }
+    },
+    
+    saveOrder() {
+      const customer = document.getElementById('orderCustomer').value.trim();
+      const sel = document.getElementById('orderInv');
+      const opt = sel.options[sel.selectedIndex];
+      const invId = opt && opt.value ? opt.value : null;
+      const invItem = invId ? this.data.inventory.find(i => i.id === invId) : null;
+      const phone = invItem ? invItem.model : document.getElementById('orderPhone').value.trim();
+      const price = parseFloat(document.getElementById('orderPrice').value);
+      const deposit = parseFloat(document.getElementById('orderDeposit').value) || 0;
+      
+      if(!customer){ this.showAlert('Enter customer name'); return; }
+      if(!phone){ this.showAlert('Enter the phone, or pick one from your Stock'); return; }
+      if(isNaN(price) || price <= 0){ this.showAlert('Enter a valid price'); return; }
+      if(deposit < 0 || deposit > price){ this.showAlert('Deposit must be between 0 and the total price'); return; }
+      if(invItem && (invItem.sold || invItem.reservedOrderId)){ this.showAlert('That phone is no longer available'); return; }
+      
+      const order = { id: this.uid(), customer, phone, price, deposit, invId, status: 'pending', date: new Date().toISOString() };
+      this.data.orders.push(order);
+      
+      if(invItem) invItem.reservedOrderId = order.id;
+      if(deposit > 0){
+        this.data.transactions.push({ id: this.uid(), type: 'deposit', desc: `Deposit — ${customer} (${phone})`, amount: deposit, orderId: order.id, date: new Date().toISOString() });
+        this.data.balance += deposit;
+      }
+      
+      this.saveData();
+      this.closeModals();
+      this.refresh();
+      this.showToast('Order created');
+    },
+    
+    completeOrder(id) {
+      const order = this.data.orders.find(o => o.id === id);
+      if(!order) return;
+      
+      this.showConfirm(
+        'Complete Order?',
+        `Mark this order as completed and record the remaining ${this.fm(order.price - order.deposit)} as a sale?`,
+        'Complete Order',
+        'btn-primary',
+        () => {
+          order.status = 'completed';
+          const remaining = order.price - order.deposit;
+          const item = order.invId ? this.data.inventory.find(i => i.id === order.invId) : null;
+          const cost = item ? item.cost : 0;
+          const profit = order.price - cost;
+          const margin = order.price > 0 ? (profit / order.price * 100) : 0;
+          
+          if(item){
+            item.sold = true;
+            item.reservedOrderId = null;
+            item.soldDate = new Date().toISOString();
+            item.actualSell = order.price;
+            item.profit = profit;
+          }
+          
+          this.data.transactions.push({ id: this.uid(), type: 'sale', desc: `Order — ${order.customer} (${order.phone})`, amount: remaining, revenue: order.price, cost, profit, margin, invId: order.invId, orderId: order.id, date: new Date().toISOString() });
+          this.data.balance += remaining;
+          
+          this.saveData();
+          this.refresh();
+          this.showToast('Order completed');
+        }
+      );
+    },
+    
+    showCancelOrder(id) {
+      this._pendingCancelOrderId = id;
+      document.getElementById('cancelRefund').value = 'refund';
+      this.openMod('md-cancel-order');
+    },
+    
+    confirmCancelOrder() {
+      const order = this.data.orders.find(o => o.id === this._pendingCancelOrderId);
+      if(!order){ this.closeModals(); return; }
+      
+      const refund = document.getElementById('cancelRefund').value === 'refund';
+      order.status = 'cancelled';
+      
+      if(order.invId){
+        const item = this.data.inventory.find(i => i.id === order.invId);
+        if(item && item.reservedOrderId === order.id) item.reservedOrderId = null;
+      }
+      
+      if(refund && order.deposit > 0){
+        this.data.transactions.push({ id: this.uid(), type: 'expense', desc: `Refund — ${order.customer} (${order.phone})`, amount: order.deposit, orderId: order.id, date: new Date().toISOString() });
+        this.data.balance -= order.deposit;
+      }
+      
+      this.saveData();
+      this.closeModals();
+      this.refresh();
+      this.showToast('Order cancelled');
+    },
+
+    /* ---------- Sale ---------- */
+    _editingSaleId: null,
+    showSale(editId, invId) {
+      this._editingSaleId = editId || null;
+      const sel = document.getElementById('saleInv');
+      const selWrap = document.getElementById('saleInvSelectWrap');
+      const roWrap = document.getElementById('saleInvReadonlyWrap');
+      const roText = document.getElementById('saleInvReadonlyText');
+      document.getElementById('saleDate').value = this.todayStr();
+
+      if(editId){
+        const t = this.data.transactions.find(x => x.id === editId);
+        this._editingSaleCost = t.cost || 0;
+        document.getElementById('saleTitle').textContent = 'Edit Sale Details';
+        document.getElementById('saleAmt').value = t.amount;
+        document.getElementById('saleDate').value = (t.date || '').slice(0, 10);
+        selWrap.style.display = 'none';
+        roWrap.style.display = '';
+        const linkedItem = t.invId ? this.data.inventory.find(i => i.id === t.invId) : null;
+        roText.textContent = linkedItem ? linkedItem.model : 'Not from your Stock list';
+      } else {
+        this._editingSaleCost = null;
+        document.getElementById('saleTitle').textContent = 'I Sold a Phone';
+        document.getElementById('saleAmt').value = '';
+        selWrap.style.display = '';
+        roWrap.style.display = 'none';
+        
+        const available = this.data.inventory.filter(i => !i.sold && !i.reservedOrderId);
+        sel.innerHTML = `<option value="">— Not from your Stock list —</option>` + available.map(i => 
+          `<option value="${i.id}" data-cost="${i.cost}" data-price="${i.sellPrice}">${App.esc(i.model)}</option>`
+        ).join('');
+        if(invId) sel.value = invId;
+      }
+      
+      this.onSaleInvChange();
+      this.openMod('md-sale');
+    },
+    
+    onSaleInvChange() {
+      if(this._editingSaleId){ this.updateSalePreview(); return; }
+      const sel = document.getElementById('saleInv');
+      const opt = sel.options[sel.selectedIndex];
+      if(opt && opt.value){
+        if(!document.getElementById('saleAmt').value) document.getElementById('saleAmt').value = opt.dataset.price;
+      }
+      this.updateSalePreview();
+    },
+    
+    updateSalePreview() {
+      let cost;
+      if(this._editingSaleId){
+        cost = this._editingSaleCost || 0;
+      } else {
+        const sel = document.getElementById('saleInv');
+        const opt = sel.options[sel.selectedIndex];
+        cost = opt && opt.value ? parseFloat(opt.dataset.cost) || 0 : 0;
+      }
+      
+      const amt = parseFloat(document.getElementById('saleAmt').value) || 0;
+      const profit = amt - cost;
+      const margin = amt > 0 ? (profit / amt * 100) : 0;
+      
+      document.getElementById('salePreviewCost').textContent = this.fm(cost);
+      document.getElementById('salePreviewProfit').textContent = `${this.fm(profit)} (${margin.toFixed(0)}%)`;
+    },
+    
+    saveSale() {
+      const amount = parseFloat(document.getElementById('saleAmt').value);
+      const date = document.getElementById('saleDate').value || this.todayStr();
+      if(isNaN(amount) || amount <= 0){ this.showAlert('Enter a valid sell amount'); return; }
+
+      if(this._editingSaleId){
+        const t = this.data.transactions.find(x => x.id === this._editingSaleId);
+        const cost = this._editingSaleCost || 0;
+        const profit = amount - cost;
+        const margin = amount > 0 ? (profit / amount * 100) : 0;
+        
+        this.data.balance -= t.amount;
+        t.amount = amount; t.profit = profit; t.margin = margin; t.date = date;
+        this.data.balance += amount;
+        
+        if(t.invId){
+          const linkedItem = this.data.inventory.find(i => i.id === t.invId);
+          if(linkedItem){ linkedItem.actualSell = amount; linkedItem.profit = profit; }
+        }
+      } else {
+        const sel = document.getElementById('saleInv');
+        const opt = sel.options[sel.selectedIndex];
+        const invId = opt && opt.value ? opt.value : null;
+        const cost = invId ? (parseFloat(opt.dataset.cost) || 0) : 0;
+        const invItem = invId ? this.data.inventory.find(i => i.id === invId) : null;
+        const desc = invItem ? invItem.model : 'Phone sale';
+        const profit = amount - cost;
+        const margin = amount > 0 ? (profit / amount * 100) : 0;
+        
+        if(invItem){ invItem.sold = true; invItem.soldDate = date; invItem.actualSell = amount; invItem.profit = profit; }
+        this.data.transactions.push({ id: this.uid(), type: 'sale', desc, amount, cost, profit, margin, invId, date });
+        this.data.balance += amount;
+      }
+      
+      this.saveData();
+      this.closeModals();
+      this.refresh();
+      this.showToast('Sale saved');
+    },
+
+    /* ---------- Expense ---------- */
+    _editingExpenseId: null,
+    showExpense(editId) {
+      this._editingExpenseId = editId || null;
+      document.getElementById('expenseDate').value = this.todayStr();
+      
+      if(editId){
+        const t = this.data.transactions.find(x => x.id === editId);
+        document.getElementById('expenseTitle').textContent = 'Edit This Expense';
+        document.getElementById('expenseDesc').value = t.desc;
+        document.getElementById('expenseAmt').value = t.amount;
+        document.getElementById('expenseDate').value = (t.date || '').slice(0, 10);
+        document.getElementById('expenseFundSource').value = t.bucket || 'profit';
+      } else {
+        document.getElementById('expenseTitle').textContent = 'I Spent Money';
+        document.getElementById('expenseDesc').value = '';
+        document.getElementById('expenseAmt').value = '';
+        document.getElementById('expenseFundSource').value = 'profit';
+      }
+      this.openMod('md-expense');
+    },
+    
+    saveExpense() {
+      const desc = document.getElementById('expenseDesc').value.trim();
+      const amount = parseFloat(document.getElementById('expenseAmt').value);
+      const date = document.getElementById('expenseDate').value || this.todayStr();
+      const bucket = document.getElementById('expenseFundSource').value;
+      
+      if(!desc){ this.showAlert('Enter a description'); return; }
+      if(isNaN(amount) || amount <= 0){ this.showAlert('Enter a valid amount'); return; }
+      
+      if(this._editingExpenseId){
+        const t = this.data.transactions.find(x => x.id === this._editingExpenseId);
+        this.data.balance += t.amount;
+        t.desc = desc; t.amount = amount; t.date = date; t.bucket = bucket;
+        this.data.balance -= amount;
+      } else {
+        this.data.transactions.push({ id: this.uid(), type: 'expense', desc, amount, date, bucket });
+        this.data.balance -= amount;
+      }
+      
+      this.saveData();
+      this.closeModals();
+      this.refresh();
+      this.showToast('Expense saved');
+    },
+
+    /* ---------- Capital ---------- */
+    _editingCapitalId: null,
+    showCapital(editId) {
+      this._editingCapitalId = editId || null;
+      document.getElementById('capitalDate').value = this.todayStr();
+      
+      if(editId){
+        const t = this.data.transactions.find(x => x.id === editId);
+        document.getElementById('capitalTitle').textContent = 'Edit Money Added';
+        document.getElementById('capitalDesc').value = t.desc;
+        document.getElementById('capitalAmt').value = t.amount;
+        document.getElementById('capitalDate').value = (t.date || '').slice(0, 10);
+      } else {
+        document.getElementById('capitalTitle').textContent = 'Add Money to the Business';
+        document.getElementById('capitalDesc').value = 'My own savings';
+        document.getElementById('capitalAmt').value = '';
+      }
+      this.openMod('md-capital');
+    },
+    
+    saveCapital() {
+      const desc = document.getElementById('capitalDesc').value.trim() || 'My own savings';
+      const amount = parseFloat(document.getElementById('capitalAmt').value);
+      const date = document.getElementById('capitalDate').value || this.todayStr();
+      
+      if(isNaN(amount) || amount <= 0){ this.showAlert('Enter a valid amount'); return; }
+      
+      if(this._editingCapitalId){
+        const t = this.data.transactions.find(x => x.id === this._editingCapitalId);
+        t.desc = desc; t.amount = amount; t.date = date;
+      } else {
+        this.data.transactions.push({ id: this.uid(), type: 'capital', desc, amount, date });
+      }
+      
+      this.saveData(); // Triggers the auto-recalc so Capital Bucket instantly updates!
+      this.closeModals();
+      this.refresh();
+      this.showToast('Capital added');
+    },
+
+    /* ---------- Edit / Delete ---------- */
+    editTxn(id) {
+      const t = this.data.transactions.find(x => x.id === id);
+      if(!t) return;
+      if(t.type === 'purchase' || t.orderId){ this.showAlert('Manage this from the Stock or Orders page.'); return; }
+      
+      if(t.type === 'sale') this.showSale(id);
+      else if(t.type === 'expense') this.showExpense(id);
+      else if(t.type === 'capital') this.showCapital(id);
+      else {
+        this.showPrompt(t.desc, t.amount, (val) => {
+          if(val === null || val === '') return;
+          const amt = parseFloat(val);
+          if(isNaN(amt) || amt <= 0){ this.showAlert('Enter a valid amount'); return; }
+          
+          if(t.type === 'deposit' || t.type === 'refund'){
+            this.data.balance += (t.type === 'deposit' ? (amt - t.amount) : -(amt - t.amount));
+          }
+          t.amount = amt;
+          this.saveData();
+          this.refresh();
+          this.showToast('Updated successfully');
+        });
+      }
+    },
+    
+    showDelete(id) {
+      this._pendingDeleteId = id;
+      const t = this.data.transactions.find(x => x.id === id);
+      if(t && (t.type === 'purchase' || t.orderId)){ this.showAlert('Manage this from the Stock or Orders page.'); return; }
+      
+      this.showConfirm(
+        'Delete transaction?',
+        `Delete "${t ? t.desc : ''}"? This will reverse its effect on your balance${t && t.invId ? ' and restore the linked phone to stock.' : '.'}`,
+        'Delete',
+        'btn-danger',
+        () => {
+          this.confirmDelete();
+        }
+      );
+    },
+    
+    confirmDelete() {
+      const id = this._pendingDeleteId;
+      const idx = this.data.transactions.findIndex(t => t.id === id);
+      if(idx === -1){ this.closeModals(); return; }
+      
+      const t = this.data.transactions[idx];
+      if(t.type === 'purchase' || t.orderId){ this.closeModals(); return; }
+      
+      if(['sale', 'deposit', 'capital'].includes(t.type)) this.data.balance -= t.amount;
+      else if(t.type === 'expense') this.data.balance += t.amount;
+      
+      if(t.type === 'sale' && t.invId){
+        const inv = this.data.inventory.find(i => i.id === t.invId);
+        if(inv){ inv.sold = false; inv.soldDate = null; inv.actualSell = null; inv.profit = null; }
+      }
+      
+      this.data.transactions.splice(idx, 1);
+      this.saveData();
+      this.closeModals();
+      this.refresh();
+      this.showToast('Transaction deleted');
+    },
+
+    /* ---------- Vault ---------- */
+    addVault() {
+      document.getElementById('vaultAddDesc').value = '';
+      document.getElementById('vaultAddAmt').value = '';
+      document.getElementById('vaultAddError').style.display = 'none';
+      this.openMod('md-vault-add');
+    },
+    
+    doAddVault() {
+      const errEl = document.getElementById('vaultAddError');
+      const amt = parseFloat(document.getElementById('vaultAddAmt').value);
+      const desc = document.getElementById('vaultAddDesc').value.trim() || 'Moved to savings';
+      
+      if(isNaN(amt) || amt <= 0){ errEl.textContent = 'Enter an amount above 0.'; errEl.style.display = 'block'; return; }
+      if(amt > this.data.balance){ errEl.textContent = `That is more than your Balance (${this.fm(this.data.balance)}). Record more sales or add money first.`; errEl.style.display = 'block'; return; }
+      
+      this.data.balance -= amt;
+      this.data.vault += amt;
+      this.data.transactions.push({ id: this.uid(), type: 'vault_out', desc: desc, amount: amt, date: new Date().toISOString() });
+      
+      this.saveData();
+      this.closeModals();
+      this.refresh();
+      this.showToast('Added to Savings');
+    },
+    
+    withdrawVault() {
+      document.getElementById('vaultWithdrawDesc').value = '';
+      document.getElementById('vaultWithdrawAmt').value = '';
+      document.getElementById('vaultWithdrawError').style.display = 'none';
+      this.openMod('md-vault-withdraw');
+    },
+    
+    doWithdrawVault() {
+      const errEl = document.getElementById('vaultWithdrawError');
+      const amt = parseFloat(document.getElementById('vaultWithdrawAmt').value);
+      const desc = document.getElementById('vaultWithdrawDesc').value.trim() || 'Withdrawn from savings';
+      
+      if(isNaN(amt) || amt <= 0){ errEl.textContent = 'Enter an amount above 0.'; errEl.style.display = 'block'; return; }
+      if(amt > this.data.vault){ errEl.textContent = `That is more than what is in your Savings (${this.fm(this.data.vault)}).`; errEl.style.display = 'block'; return; }
+      
+      this.data.vault -= amt;
+      this.data.balance += amt;
+      this.data.transactions.push({ id: this.uid(), type: 'vault_in', desc: desc, amount: amt, date: new Date().toISOString() });
+      
+      this.saveData();
+      this.closeModals();
+      this.refresh();
+      this.showToast('Withdrawn from Savings');
+    },
+
+    /* ---------- Insights ---------- */
+    showStats() {
+      const monthTxns = this.getMonthTxns();
+      document.getElementById('statRevenue').textContent = this.fm(this.totalRevenue(monthTxns), true);
+      document.getElementById('statCost').textContent = this.fm(this.totalCost(monthTxns), true);
+      document.getElementById('statProfit').textContent = this.fm(this.totalProfit(monthTxns), true);
+      document.getElementById('statMargin').textContent = `${this.profitMargin(monthTxns).toFixed(0)}%`;
+
+      const tally = {};
+      this.data.inventory.filter(i => i.sold).forEach(i => {
+        tally[i.model] = (tally[i.model] || 0) + 1;
+      });
+      
+      const top = Object.keys(tally).map(k => ({ model: k, count: tally[k] })).sort((a,b) => b.count - a.count).slice(0,5);
+      const el = document.getElementById('topPhones');
+      
+      if(!top.length){ el.innerHTML = this.emptyHtml('📱','No sales yet','Sold phones will rank here'); return; }
+      
+      el.innerHTML = top.map((p, idx) => `
+        <div class="top-phone">
+          <div class="rank">${idx + 1}</div>
+          <div class="li-body"><div class="t1">${App.esc(p.model)}</div></div>
+          <div class="li-amt">${p.count} sold</div>
+        </div>
+      `).join('');
+    },
+    
+    insights() {
+      const out = [];
+      const margin = this.profitMargin(this.getMonthTxns());
+      const todayProfit = this.getTodayTxns().filter(t => t.type === 'sale').reduce((s,t) => s + (t.profit || 0), 0);
+      const stockLeft = this.data.inventory.filter(i => !i.sold).length;
+      const totalProfit = this.totalProfit();
+
+      if(this.data.vault === 0 && this.data.balance > 500000){
+        out.push({ic:'🔒', t:'Your balance is healthy — moving some into savings keeps it safe from impulse spending.'});
+      }
+      if(todayProfit < 0){
+        out.push({ic:'📉', t:"Today's sales are running at a loss so far. Worth a look before pricing the next sale."});
+      }
+      if(margin > 0 && margin < 10){
+        out.push({ic:'⚠️', t:'This month\'s profit margin is under 10%. Consider adjusting sell prices or sourcing costs.'});
+      }
+      if(totalProfit > 0 && totalProfit >= 1000000 && totalProfit < 1100000){
+        out.push({ic:'🎉', t:'You have crossed MWK 1M in all-time profit. Nice milestone!'});
+      }
+      if(stockLeft === 0 && this.data.inventory.length > 0){
+        out.push({ic:'📦', t:'Your inventory is sold out — time to restock.'});
+      }
+      if(!out.length){
+        out.push({ic:'✅', t:'Everything looks steady. Keep recording sales and expenses to track your growth.'});
+      }
+      
+      document.getElementById('insightsList').innerHTML = out.map(i => `
+        <div class="insight-card">
+          <span class="ic">${i.ic}</span>
+          <p>${i.t}</p>
+        </div>
+      `).join('');
+    },
+
+    /* ---------- Export ---------- */
+    exportCSV() {
+      const rows = [['Date','Type','Description','Amount (cash)','Revenue','Cost','Profit','Margin']];
+      this.data.transactions.slice().sort((a,b) => {
+         const d1 = a.date || ''; const d2 = b.date || '';
+         return d1.localeCompare(d2);
+      }).forEach(t => {
+        rows.push([
+          (t.date || '').slice(0,10), 
+          t.type, 
+          `"${(t.desc || '').replace(/"/g,'""')}"`, 
+          t.amount, 
+          (t.revenue !== undefined ? t.revenue : ''), 
+          t.cost || '', 
+          t.profit || '', 
+          t.margin ? t.margin.toFixed(1) : ''
+        ]);
+      });
+      
+      const csv = rows.map(r => r.join(',')).join('\n');
+      const blob = new Blob([csv], {type: 'text/csv'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `moneybuddy-transactions-${this.todayStr()}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    },
+
+    /* ---------- Reset ---------- */
+    doRecalc() {
+      this.recalcBalance();
+      this.saveData();
+      this.closeModals();
+      this.refresh();
+      this.showToast(`Balance recalculated: ${this.fm(this.data.balance)}`);
+    },
+    
+    doFactoryReset() {
+      this.data = { transactions: [], orders: [], inventory: [], vault: 0, balance: 0 };
+      this.saveData();
+      this.closeModals();
+      this.refresh();
+      this.nav('pg-dash');
+      this.showToast('All data erased');
+    },
+
+    /* ---------- Modals ---------- */
+    openMod(id) {
+      const m = document.getElementById(id);
+      if(m){ 
+        m.classList.add('open'); 
+        document.body.style.overflow = 'hidden'; 
+      }
+    },
+    
+    closeModals() {
+      document.querySelectorAll('.modal').forEach(m => m.classList.remove('open'));
+      document.body.style.overflow = '';
+    },
+
+    /* ---------- Misc ---------- */
+    esc(s) {
+      s = s == null ? '' : String(s);
+      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    },
+    
+    emptyHtml(ic, title, sub) {
+      return `<div class="empty">
+        <div class="e-ic">${ic}</div>
+        <div class="e-t">${title}</div>
+        <div class="e-s">${sub}</div>
+      </div>`;
+    },
+
+    /* ---------- PWA ---------- */
+    setupPWA() {
+      const manifest = {
+        name: 'MoneyBuddy Pro',
+        short_name: 'MoneyBuddy',
+        start_url: '.',
+        display: 'standalone',
+        background_color: '#f1f5f9',
+        theme_color: '#4f46e5',
+        icons: []
+      };
+      const manifestBlob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
+      document.getElementById('manifestLink').href = URL.createObjectURL(manifestBlob);
+
+      const iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180"><rect width="180" height="180" rx="40" fill="%234f46e5"/><text x="90" y="115" font-size="90" text-anchor="middle">📱</text></svg>';
+      document.getElementById('appleTouchIcon').href = `data:image/svg+xml,${encodeURIComponent(iconSvg)}`;
+
+      if('serviceWorker' in navigator){
+        try{
+          const swCode = `
+            self.addEventListener('install', e => self.skipWaiting());
+            self.addEventListener('activate', e => self.clients.claim());
+            self.addEventListener('fetch', e => {
+              e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+            });
+          `;
+          const swBlob = new Blob([swCode], {type:'application/javascript'});
+          const swUrl = URL.createObjectURL(swBlob);
+          navigator.serviceWorker.register(swUrl).catch(err => console.warn('SW registration failed', err));
+        }catch(e){ console.warn('SW setup skipped', e); }
+      }
+
+      const banner = document.getElementById('offlineBanner');
+      const updateOnline = () => banner.classList.toggle('show', !navigator.onLine);
+      window.addEventListener('online', updateOnline);
+      window.addEventListener('offline', updateOnline);
+      updateOnline();
+    },
+
+    init() {
+      this.loadData();
+      this.setupPWA();
+      this.refresh();
+      
+      // Auto-close modals on outside click
+      document.querySelectorAll('.modal').forEach(m => {
+        m.addEventListener('click', e => { if(e.target === m) App.closeModals(); });
+      });
+      
+      setInterval(() => this.saveData(), 10000);
+      window.addEventListener('beforeunload', () => this.saveData());
+    }
+  };
+
+  window.App = App;
+  document.addEventListener('DOMContentLoaded', () => App.init());
+})();
+</script>
+</body>
+</html>
